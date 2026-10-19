@@ -1,3 +1,5 @@
-# Daily English
+# Daily English (IELTS ~7)
 
-Open index.html or GitHub Pages. Word changes by Asia/Hong_Kong date.
+Live: https://heigy.github.io/learnEnglish/
+
+Academic vocabulary aimed at roughly IELTS band 7. Word rotates by Asia/Hong_Kong date.
