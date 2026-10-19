@@ -1,5 +1,5 @@
-# Daily English (IELTS ~7)
+# Daily English (IELTS ~7, 2 words/day)
 
 Live: https://heigy.github.io/learnEnglish/
 
-Academic vocabulary aimed at roughly IELTS band 7. Word rotates by Asia/Hong_Kong date.
+Two academic words per Asia/Hong_Kong calendar day.
