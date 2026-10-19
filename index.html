@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="每日一词"/>
+<meta name="theme-color" content="#0f172a"/>
+<title>每日一词 · Daily English</title>
+<style>
+  :root { color-scheme: dark light; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100dvh; display: grid; place-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+    background: radial-gradient(1200px 600px at 20% -10%, #1e3a5f 0%, #0f172a 45%, #020617 100%);
+    color: #e2e8f0; padding: 24px;
+  }
+  .card {
+    width: min(440px, 100%);
+    background: rgba(15,23,42,.72);
+    border: 1px solid rgba(148,163,184,.18);
+    border-radius: 28px;
+    padding: 28px 24px 22px;
+    backdrop-filter: blur(18px);
+    box-shadow: 0 24px 80px rgba(0,0,0,.35);
+  }
+  .eyebrow { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: #94a3b8; }
+  .date { margin-top: 6px; color: #64748b; font-size: 14px; }
+  h1 { margin: 28px 0 8px; font-size: clamp(36px, 9vw, 48px); line-height: 1.05; letter-spacing: -.02em; }
+  .phonetic { color: #93c5fd; font-size: 18px; margin: 0 0 18px; }
+  .meaning { font-size: 18px; line-height: 1.5; color: #f8fafc; margin: 0 0 18px; }
+  .example {
+    margin: 0; padding: 14px 16px; border-radius: 16px;
+    background: rgba(56,189,248,.08); border: 1px solid rgba(56,189,248,.16);
+    color: #cbd5e1; line-height: 1.55; font-size: 15px;
+  }
+  .actions { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+  button {
+    appearance: none; border: 0; border-radius: 999px; padding: 12px 16px;
+    font: inherit; font-weight: 600; cursor: pointer;
+  }
+  .primary { background: #38bdf8; color: #0f172a; }
+  .ghost { background: rgba(148,163,184,.12); color: #e2e8f0; }
+  .hint { margin-top: 16px; font-size: 12px; color: #64748b; line-height: 1.4; }
+</style>
+</head>
+<body>
+  <main class="card" id="app">
+    <div class="eyebrow">Daily English</div>
+    <div class="date" id="date"></div>
+    <h1 id="word"></h1>
+    <p class="phonetic" id="phonetic"></p>
+    <p class="meaning" id="meaning"></p>
+    <p class="example" id="example"></p>
+    <div class="actions">
+      <button class="primary" id="speak" type="button">朗读</button>
+      <button class="ghost" id="copy" type="button">复制</button>
+    </div>
+    <p class="hint">按香港日期每天自动换词。可在 Safari 点「分享 → 添加到主屏幕」，五台设备收藏同一链接即可。</p>
+  </main>
+<script>
+const WORDS = [{"w": "serendipity", "p": "ˌserənˈdɪpəti", "m": "n. 意外发现美好事物的能力", "e": "Finding that café was pure serendipity."}, {"w": "ephemeral", "p": "ɪˈfemərəl", "m": "adj. 转瞬即逝的", "e": "Cherry blossoms are beautiful but ephemeral."}, {"w": "resilient", "p": "rɪˈzɪliənt", "m": "adj. 有韧性的", "e": "She stayed resilient after the setback."}, {"w": "meticulous", "p": "məˈtɪkjələs", "m": "adj. 一丝不苟的", "e": "His notes are always meticulous."}, {"w": "pragmatic", "p": "præɡˈmætɪk", "m": "adj. 务实的", "e": "We need a pragmatic plan, not slogans."}, {"w": "eloquent", "p": "ˈeləkwənt", "m": "adj. 雄辩的；有说服力的", "e": "Her speech was short but eloquent."}, {"w": "ambiguous", "p": "æmˈbɪɡjuəs", "m": "adj. 含糊不清的", "e": "The contract wording is ambiguous."}, {"w": "benevolent", "p": "bəˈnevələnt", "m": "adj. 仁慈的", "e": "He made a benevolent donation."}, {"w": "candid", "p": "ˈkændɪd", "m": "adj. 坦率的", "e": "Give me your candid feedback."}, {"w": "diligent", "p": "ˈdɪlɪdʒənt", "m": "adj. 勤奋的", "e": "Diligent practice beats talent alone."}, {"w": "empathy", "p": "ˈempəθi", "m": "n. 共情", "e": "Good leaders show real empathy."}, {"w": "flourish", "p": "ˈflʌrɪʃ", "m": "v. 繁荣；茁壮成长", "e": "Startups flourish with clear focus."}, {"w": "gratitude", "p": "ˈɡrætɪtjuːd", "m": "n. 感激", "e": "Start the day with gratitude."}, {"w": "humble", "p": "ˈhʌmbl", "m": "adj. 谦逊的", "e": "Stay humble when you win."}, {"w": "insight", "p": "ˈɪnsaɪt", "m": "n. 洞见", "e": "The data gave us a useful insight."}, {"w": "juxtapose", "p": "ˌdʒʌkstəˈpəʊz", "m": "v. 并置对照", "e": "The film juxtaposes past and present."}, {"w": "keen", "p": "kiːn", "m": "adj. 敏锐的；热切的", "e": "She has a keen eye for detail."}, {"w": "lucid", "p": "ˈluːsɪd", "m": "adj. 清晰易懂的", "e": "Keep the explanation lucid."}, {"w": "modest", "p": "ˈmɒdɪst", "m": "adj. 谦虚的；适度的", "e": "Results were modest but steady."}, {"w": "nuance", "p": "ˈnjuːɑːns", "m": "n. 细微差别", "e": "Tone carries a lot of nuance."}, {"w": "optimistic", "p": "ˌɒptɪˈmɪstɪk", "m": "adj. 乐观的", "e": "I'm cautiously optimistic."}, {"w": "perseverance", "p": "ˌpɜːsɪˈvɪərəns", "m": "n. 毅力", "e": "Success needs perseverance."}, {"w": "quintessential", "p": "ˌkwɪntɪˈsenʃl", "m": "adj. 典型的", "e": "This café is quintessential Paris."}, {"w": "robust", "p": "rəʊˈbʌst", "m": "adj. 稳健的；强健的", "e": "Build a robust habit system."}, {"w": "subtle", "p": "ˈsʌtl", "m": "adj. 微妙的", "e": "There's a subtle difference here."}, {"w": "tenacious", "p": "təˈneɪʃəs", "m": "adj. 顽强的", "e": "Stay tenacious with hard problems."}, {"w": "ubiquitous", "p": "juːˈbɪkwɪtəs", "m": "adj. 无处不在的", "e": "Phones are ubiquitous now."}, {"w": "versatile", "p": "ˈvɜːsətaɪl", "m": "adj. 多才多艺的", "e": "Python is a versatile language."}, {"w": "witty", "p": "ˈwɪti", "m": "adj. 机智幽默的", "e": "His reply was sharp and witty."}, {"w": "zealous", "p": "ˈzeləs", "m": "adj. 热情的", "e": "Be zealous, but not reckless."}, {"w": "advocate", "p": "ˈædvəkeɪt", "m": "v./n. 提倡；倡导者", "e": "I advocate slow, deep learning."}, {"w": "bias", "p": "ˈbaɪəs", "m": "n. 偏见", "e": "Watch for confirmation bias."}, {"w": "clarify", "p": "ˈklærɪfaɪ", "m": "v. 澄清", "e": "Let me clarify the goal."}, {"w": "deliberate", "p": "dɪˈlɪbərət", "m": "adj./v. 深思熟虑的；仔细考虑", "e": "Make deliberate choices."}, {"w": "evaluate", "p": "ɪˈvæljueɪt", "m": "v. 评估", "e": "Evaluate before you commit."}, {"w": "framework", "p": "ˈfreɪmwɜːk", "m": "n. 框架", "e": "We need a simple framework."}, {"w": "genuine", "p": "ˈdʒenjuɪn", "m": "adj. 真诚的；真正的", "e": "Offer genuine help."}, {"w": "hypothesis", "p": "haɪˈpɒθəsɪs", "m": "n. 假设", "e": "Test the hypothesis this week."}, {"w": "iterate", "p": "ˈɪtəreɪt", "m": "v. 迭代", "e": "Ship, learn, iterate."}, {"w": "justify", "p": "ˈdʒʌstɪfaɪ", "m": "v. 证明合理", "e": "Can you justify that cost?"}, {"w": "leverage", "p": "ˈliːvərɪdʒ", "m": "v./n. 利用；杠杆", "e": "Leverage what you already know."}, {"w": "mindset", "p": "ˈmaɪndset", "m": "n. 心态", "e": "Growth mindset changes outcomes."}, {"w": "negotiate", "p": "nɪˈɡəʊʃieɪt", "m": "v. 谈判", "e": "Learn to negotiate calmly."}, {"w": "objective", "p": "əbˈdʒektɪv", "m": "n./adj. 目标；客观的", "e": "Keep the objective clear."}, {"w": "prioritize", "p": "praɪˈɒrɪtaɪz", "m": "v. 分清优先级", "e": "Prioritize sleep and deep work."}, {"w": "qualify", "p": "ˈkwɒlɪfaɪ", "m": "v. 使具备资格；限定", "e": "Qualify your claims with data."}, {"w": "reflect", "p": "rɪˈflekt", "m": "v. 反思", "e": "Reflect for ten minutes tonight."}, {"w": "synthesize", "p": "ˈsɪnθəsaɪz", "m": "v. 综合", "e": "Synthesize notes into one page."}, {"w": "threshold", "p": "ˈθreʃhəʊld", "m": "n. 门槛；阈值", "e": "Lower the threshold to start."}, {"w": "underlying", "p": "ˌʌndəˈlaɪɪŋ", "m": "adj. Underlying的", "e": "Find the underlying cause."}, {"w": "validate", "p": "ˈvælɪdeɪt", "m": "v. 验证", "e": "Validate the idea with users."}, {"w": "workflow", "p": "ˈwɜːkfləʊ", "m": "n. 工作流", "e": "Simplify your daily workflow."}, {"w": "articulate", "p": "ɑːˈtɪkjuleɪt", "m": "v. 清晰表达", "e": "Articulate the trade-offs."}, {"w": "calibrate", "p": "ˈkælɪbreɪt", "m": "v. 校准", "e": "Calibrate expectations early."}, {"w": "discipline", "p": "ˈdɪsəplɪn", "m": "n. 自律；纪律", "e": "Discipline compounds over time."}, {"w": "efficient", "p": "ɪˈfɪʃnt", "m": "adj. 高效的", "e": "An efficient routine saves hours."}, {"w": "friction", "p": "ˈfrɪkʃn", "m": "n. 摩擦；阻力", "e": "Remove friction from good habits."}, {"w": "gauge", "p": "ɡeɪdʒ", "m": "v. 估量", "e": "Gauge progress weekly."}, {"w": "holistic", "p": "həˈlɪstɪk", "m": "adj. 整体的", "e": "Take a holistic view of health."}, {"w": "incentive", "p": "ɪnˈsentɪv", "m": "n. 激励", "e": "The right incentive changes behavior."}, {"w": "jargon", "p": "ˈdʒɑːɡən", "m": "n. 行话", "e": "Avoid jargon with beginners."}, {"w": "kindle", "p": "ˈkɪndl", "m": "v. 点燃；激起", "e": "A good mentor can kindle curiosity."}, {"w": "latency", "p": "ˈleɪtənsi", "m": "n. 延迟", "e": "High latency kills the experience."}, {"w": "momentum", "p": "məˈmentəm", "m": "n. 势头", "e": "Protect your learning momentum."}, {"w": "nurture", "p": "ˈnɜːtʃə", "m": "v. 培养", "e": "Nurture one skill at a time."}, {"w": "outcome", "p": "ˈaʊtkʌm", "m": "n. 结果", "e": "Focus on outcomes, not noise."}, {"w": "paradigm", "p": "ˈpærədaɪm", "m": "n. 范式", "e": "This is a paradigm shift."}, {"w": "query", "p": "ˈkwɪəri", "m": "n./v. 询问；查询", "e": "Write a clear query."}, {"w": "rationale", "p": "ˌræʃəˈnɑːl", "m": "n. 理由", "e": "Explain the rationale briefly."}, {"w": "scope", "p": "skəʊp", "m": "n. 范围", "e": "Keep the scope small."}, {"w": "tangible", "p": "ˈtændʒəbl", "m": "adj. 可感知的；切实的", "e": "Set a tangible weekly goal."}, {"w": "uphold", "p": "ʌpˈhəʊld", "m": "v. 维护", "e": "Uphold your own standards."}, {"w": "viable", "p": "ˈvaɪəbl", "m": "adj. 可行的", "e": "Is this plan viable?"}, {"w": "warrant", "p": "ˈwɒrənt", "m": "v. 证明…有必要", "e": "Does the risk warrant action?"}, {"w": "yearn", "p": "jɜːn", "m": "v. 渴望", "e": "Many yearn for quieter focus."}, {"w": "zest", "p": "zest", "m": "n. 热情；趣味", "e": "Add zest to your practice."}, {"w": "absorb", "p": "əbˈzɔːb", "m": "v. 吸收", "e": "Absorb one idea deeply."}, {"w": "boundary", "p": "ˈbaʊndri", "m": "n. 边界", "e": "Healthy boundaries protect energy."}, {"w": "concise", "p": "kənˈsaɪs", "m": "adj. 简洁的", "e": "Be concise in messages."}, {"w": "durable", "p": "ˈdjʊərəbl", "m": "adj. 持久的", "e": "Build durable knowledge."}, {"w": "escalate", "p": "ˈeskəleɪt", "m": "v. 升级", "e": "Don't escalate every conflict."}, {"w": "feasible", "p": "ˈfiːzəbl", "m": "adj. 可行的", "e": "Is it feasible this month?"}, {"w": "grounded", "p": "ˈɡraʊndɪd", "m": "adj. 踏实的", "e": "Stay grounded under pressure."}, {"w": "hindsight", "p": "ˈhaɪndsaɪt", "m": "n. 事后聪明", "e": "Hindsight is easy; foresight is rare."}, {"w": "intentional", "p": "ɪnˈtenʃənl", "m": "adj. 有意识的", "e": "Be intentional with your evenings."}, {"w": "journal", "p": "ˈdʒɜːnl", "m": "n./v. 日记；记日记", "e": "Journal three lines a day."}, {"w": "knowledge", "p": "ˈnɒlɪdʒ", "m": "n. 知识", "e": "Turn knowledge into action."}, {"w": "literal", "p": "ˈlɪtərəl", "m": "adj. 字面的", "e": "Don't take it too literally."}, {"w": "mindful", "p": "ˈmaɪndfl", "m": "adj. 留心的", "e": "A mindful pause helps."}, {"w": "notable", "p": "ˈnəʊtəbl", "m": "adj. 显著的", "e": "A notable improvement this week."}, {"w": "overlook", "p": "ˌəʊvəˈlʊk", "m": "v. 忽视", "e": "Don't overlook the basics."}, {"w": "pattern", "p": "ˈpætn", "m": "n. 模式", "e": "Spot the recurring pattern."}, {"w": "quiet", "p": "ˈkwaɪət", "m": "adj. 安静的", "e": "Protect quiet thinking time."}, {"w": "refine", "p": "rɪˈfaɪn", "m": "v. 打磨", "e": "Refine the draft once more."}, {"w": "signal", "p": "ˈsɪɡnəl", "m": "n. 信号", "e": "Separate signal from noise."}, {"w": "trust", "p": "trʌst", "m": "n./v. 信任", "e": "Trust builds slowly."}, {"w": "urgent", "p": "ˈɜːdʒənt", "m": "adj. 紧急的", "e": "Urgent is not always important."}, {"w": "vivid", "p": "ˈvɪvɪd", "m": "adj. 生动的", "e": "Use vivid examples."}, {"w": "wisdom", "p": "ˈwɪzdəm", "m": "n. 智慧", "e": "Wisdom is applied experience."}, {"w": "yield", "p": "jiːld", "m": "v. 产生；让步", "e": "Small habits yield big returns."}];
+function nowHK(){
+  const s = new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Hong_Kong',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+  return s; // YYYY-MM-DD
+}
+function dayIndex(iso){
+  const [y,m,d] = iso.split('-').map(Number);
+  const start = Date.UTC(y,0,0);
+  const now = Date.UTC(y,m-1,d);
+  return Math.floor((now-start)/86400000);
+}
+function pick(iso){
+  const i = dayIndex(iso) % WORDS.length;
+  return WORDS[i];
+}
+const iso = nowHK();
+const item = pick(iso);
+document.getElementById('date').textContent = iso + ' · Asia/Hong_Kong';
+document.getElementById('word').textContent = item.w;
+document.getElementById('phonetic').textContent = '/' + item.p + '/';
+document.getElementById('meaning').textContent = item.m;
+document.getElementById('example').textContent = item.e;
+document.getElementById('speak').onclick = () => {
+  const u = new SpeechSynthesisUtterance(item.w + '. ' + item.e);
+  u.lang = 'en-US'; speechSynthesis.cancel(); speechSynthesis.speak(u);
+};
+document.getElementById('copy').onclick = async () => {
+  const text = `${item.w} /${item.p}/\n${item.m}\n${item.e}`;
+  await navigator.clipboard.writeText(text);
+  const b = document.getElementById('copy'); b.textContent = '已复制'; setTimeout(()=>b.textContent='复制',1200);
+};
+</script>
+</body>
+</html>
